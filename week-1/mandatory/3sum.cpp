@@ -8,17 +8,21 @@ public:
             if(i>0 && nums[i]==nums[i-1]) {
                 continue;
             }
-            set <int> covered;
-            set <int> done;
-            reqsum=-nums[i];
-            for(int j=i+1; j<nums.size(); j++) {
-                req=reqsum - nums[j];
-                if(covered.count(req) && !done.count(nums[j])) {
-                    ans.push_back({nums[i], nums[j], req});
-                    done.insert(nums[j]);
-                    done.insert(req);
+            reqsum = -nums[i];
+            int left=i+1, right=nums.size()-1;
+            while(right-left>=1) {
+                if(nums[left]+nums[right]>reqsum) {
+                    right--;
+                    continue;
                 }
-                covered.insert(nums[j]);
+                if(nums[left]+nums[right]<reqsum) {
+                    left++;
+                    continue;
+                }
+                ans.push_back({nums[i], nums[left], nums[right]});
+                left++; right--;
+                while(left<nums.size() && nums[left-1]==nums[left]) left++;
+                while(right>=0 && nums[right+1]==nums[right]) right--;
             }
         }
         return ans;
