@@ -1,63 +1,59 @@
 class Solution {
 public:
-    vector<vector<int>> answer(int n) {
-        if(n==1) {
-            return {{0}};
-        }
-        auto smaller = answer(n-1);
-        int size=smaller.size();
-        vector<vector<int>> ans;
-        for(int i=0; i<size; i++) { //loop over all configs
-            for(int j=0; j<=n-1; j++) { //where to insert the new queen
-                //check if this posn okay
-                unordered_set<int> checkset1, checkset2;
-                bool ok=true;
-                //check for duplicate i-j's, i+j's for diagnoal
-                for(int k=0; k<n; k++) {
-                    int y;
-                    if(k==j) {y=n-1;} 
-                    else if(k>j) {y=smaller[i][k-1];} 
-                    else {y=smaller[i][k];}
-                    int iminusj = k-y;
-                    if(checkset1.count(iminusj)) {
-                        ok=false;
-                        break;
-                    }
-                    checkset1.insert(iminusj);
-                    int iplusj = k+y;
-                    if(checkset2.count(iplusj)) {
-                        ok =false;
-                        break;
-                    }
-                    checkset2.insert(iplusj);
-                }
-                if(!ok) continue;
 
-                vector<int> oneans = smaller[i];
-                if(j==n-1) {
-                    oneans.push_back(n-1);
-                } else {
-                    oneans.insert(oneans.begin()+j, n-1);
-                }
-                ans.push_back(oneans);
+    //backtracking, what an elegance; state is important, keep going down and changing same data structure
+    void backtrackRowAdd(unordered_set<int>& cols, unordered_set<int>& minus, unordered_set<int>& plus, vector<int>& board, int row, int n, vector<vector<int>>& answers) {
+        //final row added, just save answer
+        if(row==n) {
+            answers.push_back(board);
+            return;
+        }
+        for(int col=0; col<n; col++) {
+            //pruning part
+            if(cols.count(col)) {
+                continue;
             }
+            if(minus.count(row-col)) {
+                continue;
+            }
+            if(plus.count(row+col)) {
+                continue;
+            }
+            //add to state
+            board.push_back(col);
+            cols.insert(col);
+            minus.insert(row-col);
+            plus.insert(row+col);
+            //add further rows(all possibilities) with given state
+            backtrackRowAdd(cols, minus, plus, board, row+1, n, answers);
+            //remove stuff back to move on to next possible row
+            board.pop_back();
+            cols.erase(col);
+            minus.erase(row-col);
+            plus.erase(row+col);
         }
-
-        return ans;
+        //nothing to do here
+        return;
     }
 
     vector<vector<string>> solveNQueens(int n) {
-        vector<vector<int>> compressed = answer(n);
-        vector<vector<string>> ans;
-        for(int i=0; i<compressed.size(); i++) {
-            ans.push_back({});
+        unordered_set<int> cols, minus, plus;
+        vector<int> board;
+        vector<vector<int>> answers;
+        backtrackRowAdd(cols, minus, plus, board, 0, n, answers);
+        //convert into required format
+        vector<vector<string>> str_ans;
+        string str="";
+        for(int i=0; i<answers.size(); i++) {
+            str_ans.push_back({});
             for(int j=0; j<n; j++) {
-                ans.back().push_back("");
-                for(int k=0; k<n ; k++) {
-                    ans.back().back()+= k==compressed[i][j]?"Q":".";
+                for(int k=0; k<n; k++) {
+                    str+=(k==answers[i][j])? "Q":".";
                 }
+                str_ans.back().push_back(str);
+                str="";
             }
         }
-        return ans;
+        return str_ans;
     }
 };
