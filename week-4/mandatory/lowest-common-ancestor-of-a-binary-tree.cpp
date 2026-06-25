@@ -7,25 +7,26 @@
  *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
  * };
  */
-bool pfound = false, qfound = false;
 class Solution {
 public:
+    pair<bool, bool> lca(TreeNode* root, TreeNode* p, TreeNode* q, TreeNode* &ans) {
+        if(!root) {
+            return {0,0};
+        }
+        pair<bool, bool> foundleft = lca(root->left, p, q, ans);
+        pair<bool, bool> foundright = lca(root->right, p, q, ans);
+        if(ans) {
+            return {1,1};
+        }
+        if((foundleft.first || foundright.first || root == p) && (foundleft.second || foundright.second || root == q)) {
+            ans = root;
+        }
+        return {foundleft.first || foundright.first || root==p, foundleft.second || foundright.second || root==q};
+    }
+
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if(root==nullptr) {
-            return nullptr;
-        }
-        
-        TreeNode* lcaL = lowestCommonAncestor(root->left, p, q);
-        TreeNode* lcaR = lowestCommonAncestor(root->right, p, q);
-        if(lcaL) {
-            return lcaL;
-        } else if(lcaR) {
-            return lcaR;
-        } else if(pfound && qfound) {
-            return root;
-        }
-        pfound = pfound || p==root;
-        qfound = qfound || q==root;
-        return nullptr;
+        TreeNode* ans=nullptr;
+        lca(root, p, q, ans);
+        return ans;
     }
 };
