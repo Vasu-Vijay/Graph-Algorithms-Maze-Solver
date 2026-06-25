@@ -7,14 +7,16 @@ public:
     }
 
     void siftDown(vector<int>& nums, int i, int n) {
-        int left, right;
+        int left, right, j;
         left = 2*i+1; 
         right = 2*i+2;
         while(right<n) {
             if(nums[i]>=nums[left] && nums[i]>=nums[right]) {
                 break;
             }
-            swap(nums, i, left>right?left:right);
+            j = nums[left]>nums[right]?left : right;
+            swap(nums, i, j);
+            i=j;
             left = 2*i+1; 
             right = 2*i+2;
         }
@@ -34,6 +36,7 @@ public:
         int last = heap.back();
         int front = heap[0];
         heap.pop_back();
+        heap[0] = last;
         siftDown(heap, 0, heap.size());
         return front;
     }
