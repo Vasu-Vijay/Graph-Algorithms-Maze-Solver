@@ -5,14 +5,14 @@ bool checkSurrounded(vector<vector<char>>& board, vector<vector<bool>>& visited,
     if(visited[i][j]) { return true; }
 
     visited[i][j] = true;
-    bool surrounded = checkSurrounded(board, visited, i+1, j) && checkSurrounded(board, visited, i-1, j) && checkSurrounded(board, visited, i, j+1) && checkSurrounded(board, visited, i, j-1);
-    // visited[i][j]=false;
-    if(surrounded)
+    bool surrounded = checkSurrounded(board, visited, i+1, j);
+    surrounded = checkSurrounded(board, visited, i-1, j) && surrounded;
+    surrounded = checkSurrounded(board, visited, i, j+1) && surrounded;
+    surrounded = checkSurrounded(board, visited, i, j-1) && surrounded;
     return surrounded;
 }
 
 void convert(vector<vector<char>>& board, vector<vector<bool>>& visited, int i, int j) {
-    // cout<<"convert called for i="<<i<<", j="<<j<<endl;
     int m = board.size(), n = board[0].size();
     if(i<0 || i>=m || j<0 || j>=n) { return; }
     if(board[i][j] == 'X') { return; }
