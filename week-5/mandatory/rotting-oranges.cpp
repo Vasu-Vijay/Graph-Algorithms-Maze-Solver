@@ -1,50 +1,44 @@
-void handle(vector<vector<int>>& grid, queue<int>& qi, queue<int>& qj, vector<vector<int>>& secs, int i, int j, int parent_sec, vector<vector<bool>>& visited) {
-    int m = grid.size(), n = grid[0].size();
-    if (i < 0 || i >= m || j < 0 || j >= n) {
-        return;
-    }
-    if(visited[i][j]) { return; }
-    if(grid[i][j] == 2 || grid[i][j] == 0) {
-        return;
-    }
-    visited[i][j] = true;
-    grid[i][j] = 3;
-    secs[i][j] = min(secs[i][j],parent_sec + 1);
-    qi.push(i);
-    qj.push(j);
-    return;
-}
-
 class Solution {
+private:
+    bool handle(vector<vector<int>>& grid, queue<pair<int, int>>& q, int i, int j) {
+        int m = grid.size(), n = grid[0].size();
+        if (i < 0 || i >= m || j < 0 || j >= n) {
+            return false;
+        }
+        if(grid[i][j] == 2 || grid[i][j]==0) { 
+            return false;
+        }
+        grid[i][j] = 2;
+        q.push({i,j});
+        return true;
+    }
+
 public:
     int orangesRotting(vector<vector<int>>& grid) {
         int m = grid.size(), n = grid[0].size();
-        queue<int> qi, qj;
-        int fi, fj;
-        vector<vector<int>> secs(m, vector<int>(n, INT_MAX));
-
+        queue<pair<int, int>> q;
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 2) {
-                    vector<vector<bool>> visited(m, vector<bool>(n, false));
-                    visited[i][j] = true;
-                    secs[i][j] = 0;
-                    qi.push(i);
-                    qj.push(j);
-                    while (!qi.empty() && !qj.empty()) {
-                        fi = qi.front();
-                        fj = qj.front();
-                        qi.pop();
-                        qj.pop();
-
-                        handle(grid, qi, qj, secs, fi+1, fj, secs[fi][fj], visited);
-                        handle(grid, qi, qj, secs, fi-1, fj, secs[fi][fj], visited);
-                        handle(grid, qi, qj, secs, fi, fj+1, secs[fi][fj], visited);
-                        handle(grid, qi, qj, secs, fi, fj-1, secs[fi][fj], visited);
-                    }
-                }
+                if (grid[i][j] == 2)
+                    q.push({i, j});
             }
         }
+        int time = 0;
+        while(!q.empty()) {
+            int sz = q.size();
+            bool rotted = false;
+            while (sz--) {
+                auto [i, j] = q.front();
+                q.pop();
+
+                rotted = handle(grid, q, i+1, j) || rotted;
+                rotted = handle(grid, q, i-1, j) || rotted;
+                rotted = handle(grid, q, i, j+1) || rotted;
+                rotted = handle(grid, q, i, j-1) || rotted;
+            }
+            if(rotted) { time++; }
+        }
+
         for(int i=0; i<m ; i++) {
             for(int j=0; j<n; j++) {
                 if(grid[i][j] == 1) {
@@ -52,15 +46,7 @@ public:
                 }
             }
         }
-        
-        int ans = 0;
-        for(int i=0; i<m ; i++) {
-            for(int j=0; j<n; j++) {
-                if(grid[i][j] == 3) {
-                    ans = max(ans, secs[i][j]);
-                }
-            }
-        }
-        return ans;
+
+        return time;
     }
 };
